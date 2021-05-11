@@ -1,4 +1,5 @@
-node_modules
-./dist
-dist
-src/migrations
+r_backend/node_modules
+r_backend/dist
+r_backend/src/migrations
+
+f_frontend/node_modules
