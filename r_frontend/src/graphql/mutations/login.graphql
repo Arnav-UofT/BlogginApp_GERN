@@ -17,8 +17,7 @@ mutation Login($options: UserPassInput!) {
       message
     }
     user {
-      _id
-      username
+      ...RegUser
     }
   }
 }
