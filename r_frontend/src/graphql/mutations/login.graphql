@@ -1,0 +1,24 @@
+# mutation Login($username: String!, $password: String!) {
+#   login(options: { username: $username, password: $password }) {
+#     errors {
+#       field
+#       message
+#     }
+#     user {
+#       _id
+#       username
+#     }
+#   }
+# }
+mutation Login($options: UserPassInput!) {
+  login(options: $options) {
+    errors {
+      field
+      message
+    }
+    user {
+      _id
+      username
+    }
+  }
+}

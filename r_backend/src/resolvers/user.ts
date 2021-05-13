@@ -11,6 +11,7 @@ import {
   Query,
 } from "type-graphql";
 import argon2 from "argon2";
+import { EntityManager } from "@mikro-orm/postgresql";
 
 @InputType()
 class UserPassInput {
@@ -75,13 +76,26 @@ export class UserResolver {
     }
 
     const hashedpass = await argon2.hash(options.password);
-    const user = em.create(User, {
-      username: options.username,
-      password: hashedpass,
-    });
+    // const user = em.create(User, {
+    //   username: options.username,
+    //   password: hashedpass,
+    // });
+    let user;
     try {
-      await em.persistAndFlush(user);
+      const result = await (em as EntityManager)
+        .createQueryBuilder(User)
+        .getKnexQuery()
+        .insert({
+          username: options.username,
+          password: hashedpass,
+          created_at: new Date(),
+          updated_at: new Date(),
+        })
+        .returning("*");
+      user = result[0];
+      // await em.persistAndFlush(user);
     } catch (err) {
+      // err.details.includes("already exists")
       if (err.code === "23505") {
         return {
           errors: [
@@ -92,13 +106,10 @@ export class UserResolver {
           ],
         };
       }
-      console.log("message: ", err.message);
     }
-
     // registering also makes a cookie
     // logs the new user in
-    req.session!.userId = user._id;
-
+    req.session!.userId = (user as User)._id;
     return { user };
   }
 
