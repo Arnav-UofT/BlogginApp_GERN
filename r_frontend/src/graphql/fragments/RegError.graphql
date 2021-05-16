@@ -1,0 +1,4 @@
+fragment RegError on UserError {
+  field
+  message
+}

@@ -1,0 +1,8 @@
+fragment RegUserRes on UserRes {
+  errors {
+    ...RegError
+  }
+  user {
+    ...RegUser
+  }
+}
