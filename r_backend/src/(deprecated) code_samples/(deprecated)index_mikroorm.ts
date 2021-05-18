@@ -1,6 +1,8 @@
 import "reflect-metadata";
+import { MikroORM } from "@mikro-orm/core";
 import { COOKIE_NAME, __prod__ } from "./constants";
-import { Post } from "./entities/Post";
+import {} from "./entities/Post";
+import mConfig from "./mikro-orm.config";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
@@ -10,22 +12,16 @@ import { UserResolver } from "./resolvers/user";
 import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
+import { MyContext } from "./types";
 import cors from "cors";
 import { createConnection } from "typeorm";
-import { User } from "./entities/User";
 
 const main = async () => {
-  const conn = await createConnection({
-    type: "postgres",
-    database: "my_reddit",
-    username: "postgres",
-    password: "postgres",
-    logging: true,
-    synchronize: true,
-    entities: [Post, User],
-  });
+  //sendEmail("test@test.com", "Hi bro :)");
 
-  //await Post.delete({});
+  const orm = await MikroORM.init(mConfig);
+  // await orm.em.nativeDelete(User, {});
+  await orm.getMigrator().up();
 
   const app = express();
   app.listen(4000, () => {
@@ -67,13 +63,24 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }) => ({ req, res, redis }),
+    context: ({ req, res }): MyContext => ({ em: orm.em, req, res, redis }),
   });
 
   apolloSever.applyMiddleware({
     app,
     cors: false, //{ origin: "http://localhost:3000" },
   });
+  // app.get('/', (req, res) => {
+  //     res.send("hello")
+  // }) // example EXPRESS endpoint
+
+  // ----------------------ORM stuff below
+  // const post = orm.em.create(Post, {title: 'First post'})
+  // await orm.em.persistAndFlush(post)
+
+  // const posts = await orm.em.find(Post, {})
+  // console.log(posts)
+  //THIS one is useless LOL await orm.em.nativeInsert(Post, {title: 'Second post'})
 };
 
 main().catch((err) => {
