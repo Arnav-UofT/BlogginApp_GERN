@@ -29,7 +29,7 @@
     "baseUrl": "."
   },
   "exclude": [
-    "node_modules"
+    "node_modules", "src/(deprecated) code_samples"
   ],
   "include": [
     "./src/**/*.tsx",

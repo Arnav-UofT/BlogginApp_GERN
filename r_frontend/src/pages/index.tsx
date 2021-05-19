@@ -8,9 +8,10 @@ import { Link } from "@chakra-ui/layout";
 
 const Index = () => {
   const [{ data }] = usePostsQuery({
-    pause: isServer(),
+    // pause: isServer(),
+    variables: { limit: 10 },
   });
-  console.log(data);
+  //console.log(data);
   return (
     <Layout>
       <NextLink href="/create-post">

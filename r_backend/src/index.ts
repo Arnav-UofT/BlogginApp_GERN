@@ -13,6 +13,7 @@ import connectRedis from "connect-redis";
 import cors from "cors";
 import { createConnection } from "typeorm";
 import { User } from "./entities/User";
+import path from "path";
 
 const main = async () => {
   const conn = await createConnection({
@@ -23,10 +24,11 @@ const main = async () => {
     logging: true,
     synchronize: true,
     entities: [Post, User],
+    migrations: [path.join(__dirname, "./migrations/*")],
   });
 
   //await Post.delete({});
-
+  await conn.runMigrations();
   const app = express();
   app.listen(4000, () => {
     console.log("Server Reddi :) on port 4k");

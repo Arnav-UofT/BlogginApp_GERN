@@ -12,6 +12,7 @@ import {
 } from "type-graphql";
 import { MyContext } from "src/types";
 import { isAuth } from "../middleware/isAuth";
+import { getConnection } from "typeorm";
 
 @InputType()
 export class PostInput {
@@ -24,8 +25,24 @@ export class PostInput {
 @Resolver()
 export class PostResolver {
   @Query(() => [Post])
-  posts(): Promise<Post[]> {
-    return Post.find();
+  posts(
+    @Arg("limit", () => Int) limit: number,
+    @Arg("cursor", () => String, { nullable: true }) cursor: string
+  ): Promise<Post[]> {
+    const realLimit = Math.min(50, limit);
+    const qB = getConnection()
+      .getRepository(Post)
+      .createQueryBuilder("p")
+      .orderBy('"createdAt"', "DESC")
+      .take(realLimit);
+
+    if (cursor) {
+      // this helps to get data before the cursor value
+      // Any posts (limited) before the passed data are returned in descending
+      qB.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
+    }
+    return qB.getMany();
+    // return Post.find();
   }
 
   @Query(() => Post, { nullable: true })
