@@ -4,25 +4,62 @@ import { usePostsQuery } from "../generated/graphql";
 import { isServer } from "../utils/isServer";
 import { Layout } from "../components/Layout";
 import NextLink from "next/link";
-import { Link } from "@chakra-ui/layout";
+import { Flex, Link, Stack } from "@chakra-ui/layout";
+import React, { useState } from "react";
+import { Box, Button, Heading, Text } from "@chakra-ui/react";
 
 const Index = () => {
-  const [{ data }] = usePostsQuery({
-    // pause: isServer(),
-    variables: { limit: 10 },
+  const [variables, setVariables] = useState({
+    limit: 10,
+    cursor: null as null | string,
   });
-  //console.log(data);
+  const [{ data, fetching }] = usePostsQuery({
+    // pause: isServer(),
+    variables,
+  });
+
+  if (!fetching && !data) {
+    return <div>Query failed due to some Error. No Posts.</div>;
+  }
   return (
-    <Layout>
-      <NextLink href="/create-post">
-        <Link> Create a Post</Link>
-      </NextLink>
+    <Layout variant="regular">
+      <Flex>
+        <Heading> Welcome to My_Reddit </Heading>
+        <NextLink href="/create-post">
+          <Link ml="auto"> Create a Post</Link>
+        </NextLink>
+      </Flex>
       <br />
-      {!data ? (
-        <div>loading</div>
+      {!data && fetching ? (
+        <div>Loading posts for you</div>
       ) : (
-        data.posts.map((p) => <div key={p._id}>{p.title}</div>)
+        <Stack spacing={4}>
+          {data!.posts.posts.map((p) => (
+            <Box key={p._id} p={5} shadow="md" borderWidth="1px">
+              <Heading fontSize="xl">{p.title}</Heading>
+              <Text mt={4}>{p.textSnippet}...</Text>
+            </Box>
+          ))}
+        </Stack>
       )}
+      {data && data.posts.hasNext ? (
+        <Flex>
+          <Button
+            m="auto"
+            my={8}
+            variant="solid"
+            colorScheme="blackAlpha"
+            onClick={() => {
+              setVariables({
+                limit: variables.limit,
+                cursor: data.posts.posts[data.posts.posts.length - 1].createdAt,
+              });
+            }}
+          >
+            Load More...
+          </Button>
+        </Flex>
+      ) : null}
     </Layout>
   );
 };

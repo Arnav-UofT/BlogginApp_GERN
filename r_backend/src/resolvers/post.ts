@@ -9,6 +9,9 @@ import {
   InputType,
   Ctx,
   UseMiddleware,
+  FieldResolver,
+  Root,
+  ObjectType,
 } from "type-graphql";
 import { MyContext } from "src/types";
 import { isAuth } from "../middleware/isAuth";
@@ -22,32 +25,52 @@ export class PostInput {
   text: string;
 }
 
-@Resolver()
+@ObjectType()
+class PaginatedPosts {
+  @Field(() => [Post])
+  posts: Post[];
+  @Field()
+  hasNext: boolean;
+}
+
+@Resolver(Post)
 export class PostResolver {
-  @Query(() => [Post])
-  posts(
+  @Query(() => PaginatedPosts)
+  async posts(
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => String, { nullable: true }) cursor: string
-  ): Promise<Post[]> {
+  ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
+    const extraLimit = realLimit + 1;
+    //fetch 1 extra to check if there are more
+
     const qB = getConnection()
       .getRepository(Post)
       .createQueryBuilder("p")
       .orderBy('"createdAt"', "DESC")
-      .take(realLimit);
+      .take(extraLimit);
 
     if (cursor) {
       // this helps to get data before the cursor value
       // Any posts (limited) before the passed data are returned in descending
       qB.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
     }
-    return qB.getMany();
+    const posts = await qB.getMany();
+    return {
+      posts: posts.slice(0, realLimit),
+      hasNext: posts.length === extraLimit,
+    };
     // return Post.find();
   }
 
   @Query(() => Post, { nullable: true })
   post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
     return Post.findOne(id);
+  }
+
+  @FieldResolver(() => String)
+  textSnippet(@Root() root: Post) {
+    return root.text.slice(0, 50);
   }
 
   @Mutation(() => Post)
