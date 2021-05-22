@@ -6,7 +6,9 @@ import { Layout } from "../components/Layout";
 import NextLink from "next/link";
 import { Flex, Link, Stack } from "@chakra-ui/layout";
 import React, { useState } from "react";
-import { Box, Button, Heading, Text } from "@chakra-ui/react";
+import { Box, Button, Heading, IconButton, Text } from "@chakra-ui/react";
+import { ArrowDownIcon, ArrowUpIcon, SearchIcon } from "@chakra-ui/icons";
+import { Voting } from "../components/Voting";
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -35,11 +37,14 @@ const Index = () => {
       ) : (
         <Stack spacing={4}>
           {data!.posts.posts.map((p) => (
-            <Box key={p._id} p={5} shadow="md" borderWidth="1px">
-              <Heading fontSize="xl">{p.title}</Heading>
-              <Text> by {p.creator.username}</Text>
-              <Text mt={4}>{p.textSnippet}...</Text>
-            </Box>
+            <Flex key={p._id} p={5} shadow="md" borderWidth="1px">
+              <Voting post={p} />
+              <Box paddingLeft={5}>
+                <Heading fontSize="xl">{p.title}</Heading>
+                <Text> by {p.creator.username}</Text>
+                <Text mt={4}>{p.textSnippet}...</Text>
+              </Box>
+            </Flex>
           ))}
         </Stack>
       )}

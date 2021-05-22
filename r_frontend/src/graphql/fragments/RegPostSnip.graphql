@@ -1,0 +1,12 @@
+fragment RegPostSnip on Post {
+  title
+  _id
+  points
+  createdAt
+  updatedAt
+  textSnippet
+  creator {
+    username
+    _id
+  }
+}

@@ -113,22 +113,66 @@ export class PostResolver {
     const { userId } = req.session;
     const isUpdoot = value !== -1;
     const realVal = isUpdoot ? 1 : -1;
-    // await Updoot.insert({ userId, postId, value: realVal });
+    const updoot = await Updoot.findOne({ where: { userId, postId } });
 
-    await getConnection().query(
-      `
-      START TRANSACTION;
-      INSERT INTO updoot ("userId", "postId", value)
-      values (${userId}, ${postId}, ${realVal});
-      UPDATE post
-      SET points = points + ${realVal}
-      WHERE _id = ${postId};
-      COMMIT;
-    `
-    );
+    // this user already voted this post
+    // but wants to change ;)
+    if (updoot && updoot.value !== realVal) {
+      await getConnection().transaction(async (tm) => {
+        tm.query(
+          `
+          UPDATE updoot
+          SET value = $1
+          WHERE "postId" = $2 and "userId" = $3;
+        `,
+          [realVal, postId, userId]
+        );
+        await tm.query(
+          `
+          UPDATE post
+          SET points = points + $1
+          WHERE _id = $2;
+        `,
+          [2 * realVal, postId]
+        );
+      });
+    } else if (!updoot) {
+      // not voted before
+      await getConnection().transaction(async (tm) => {
+        tm.query(
+          `
+          INSERT INTO updoot ("userId", "postId", value)
+          values ($1, $2, $3);
+        `,
+          [userId, postId, realVal]
+        );
+        await tm.query(
+          `
+          UPDATE post
+          SET points = points + $1
+          WHERE _id = $2;
+        `,
+          [realVal, postId]
+        );
+      });
+    }
+    return true;
+    // 1 - DIRECT await Updoot.insert({ userId, postId, value: realVal });
+    //
+
+    // 2 - BUILDER await getConnection().query(
+    //   `
+    //   START TRANSACTION;
+    //   INSERT INTO updoot ("userId", "postId", value)
+    //   values (${userId}, ${postId}, ${realVal});
+    //   UPDATE post
+    //   SET points = points + ${realVal}
+    //   WHERE _id = ${postId};
+    //   COMMIT;
+    // `
+    // );
 
     // await Post.update()
-    return true;
   }
 
   @Mutation(() => Post)

@@ -2,15 +2,7 @@ query Posts($limit: Int!, $cursor: String) {
   posts(cursor: $cursor, limit: $limit) {
     hasNext
     posts {
-      title
-      _id
-      createdAt
-      updatedAt
-      textSnippet
-      creator {
-        username
-        _id
-      }
+      ...RegPostSnip
     }
   }
 }
