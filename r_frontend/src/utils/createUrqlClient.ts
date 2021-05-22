@@ -77,14 +77,6 @@ Resolver => {
       cache.resolve(entityKey, fieldKey) as string,
       "posts"
     );
-    // console.log(
-    //   "fieldKey: ",
-    //   fieldKey,
-    //   "infos: ",
-    //   fieldInfos,
-    //   "entitykey: ",
-    //   entityKey
-    // );
     info.partial = !isCached;
     const result: string[] = [];
     let hasNext = true;
@@ -167,10 +159,21 @@ export const createUrqlClient = (ssrExchange: any) => ({
           createPost: (_result, _args, cache, _info) => {
             // 1 option is put post on top
             // 2nd invalidate the query then it resest the whole thing
-            cache.invalidate("Query", "posts", {
-              limit: 10,
-              cursor: null,
+
+            // 3rd invalidate by insoecting the fields of cache (like cursorpagin)
+            const allFields = cache.inspectFields("Query");
+            const fieldInfos = allFields.filter(
+              (info) => info.fieldName === "posts"
+            );
+            fieldInfos.forEach((fi) => {
+              cache.invalidate("Query", "posts", fi.arguments || {});
             });
+
+            //  this option 2
+            // cache.invalidate("Query", "posts", {
+            //   limit: 10,
+            //   cursor: null,
+            // });
           },
           logout: (_result, _args, cache, _info) => {
             bUpQuery<LogoutMutation, MeQuery>(
