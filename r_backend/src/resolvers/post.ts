@@ -12,10 +12,12 @@ import {
   FieldResolver,
   Root,
   ObjectType,
+  Info,
 } from "type-graphql";
 import { MyContext } from "src/types";
 import { isAuth } from "../middleware/isAuth";
 import { getConnection } from "typeorm";
+import { Updoot } from "../entities/Updoot";
 
 @InputType()
 export class PostInput {
@@ -44,18 +46,46 @@ export class PostResolver {
     const extraLimit = realLimit + 1;
     //fetch 1 extra to check if there are more
 
-    const qB = getConnection()
-      .getRepository(Post)
-      .createQueryBuilder("p")
-      .orderBy('"createdAt"', "DESC")
-      .take(extraLimit);
-
+    const replacement: any[] = [extraLimit];
     if (cursor) {
-      // this helps to get data before the cursor value
-      // Any posts (limited) before the passed data are returned in descending
-      qB.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
+      replacement.push(new Date(parseInt(cursor)));
     }
-    const posts = await qB.getMany();
+
+    const posts = await getConnection().query(
+      `
+    SELECT p.*,
+    json_build_object(
+      '_id', u._id,
+      'username', u.username,
+      'email', u.email,
+      'createdAt', u."createdAt",
+      'updatedAt', u."updatedAt"
+      ) creator
+    FROM post p
+    INNER JOIN public.user u ON u._id = p."creatorId"
+    ${cursor ? `WHERE p."createdAt" < $2` : ""}
+    ORDER BY p."createdAt" DESC
+    limit $1
+    `,
+      replacement
+    );
+
+    // const qB = getConnection() ---- THIS is from query builder
+    //   .getRepository(Post)
+    //   .createQueryBuilder("p")
+    //   .innerJoinAndSelect("p.creator", "u", 'u._id = p."creatorId"')
+    //   .orderBy('p."createdAt"', "DESC")
+    //   .take(extraLimit);
+
+    // if (cursor) {
+    //   // this helps to get data before the cursor value
+    //   // Any posts (limited) before the passed data are returned in descending
+    //   qB.where('p."createdAt" < :cursor', {
+    //     cursor: new Date(parseInt(cursor)),
+    //   });
+    // }
+    // const posts = await qB.getMany();
+    // console.log(posts);
     return {
       posts: posts.slice(0, realLimit),
       hasNext: posts.length === extraLimit,
@@ -71,6 +101,34 @@ export class PostResolver {
   @FieldResolver(() => String)
   textSnippet(@Root() root: Post) {
     return root.text.slice(0, 50);
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  async vote(
+    @Arg("postId", () => Int) postId: number,
+    @Arg("value", () => Int) value: number,
+    @Ctx() { req }: MyContext
+  ) {
+    const { userId } = req.session;
+    const isUpdoot = value !== -1;
+    const realVal = isUpdoot ? 1 : -1;
+    // await Updoot.insert({ userId, postId, value: realVal });
+
+    await getConnection().query(
+      `
+      START TRANSACTION;
+      INSERT INTO updoot ("userId", "postId", value)
+      values (${userId}, ${postId}, ${realVal});
+      UPDATE post
+      SET points = points + ${realVal}
+      WHERE _id = ${postId};
+      COMMIT;
+    `
+    );
+
+    // await Post.update()
+    return true;
   }
 
   @Mutation(() => Post)

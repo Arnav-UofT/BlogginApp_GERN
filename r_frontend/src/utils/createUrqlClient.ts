@@ -70,7 +70,7 @@ Resolver => {
     if (size === 0) {
       return undefined;
     }
-
+    // console.log(cache);
     // how to decide when to update cache
     const fieldKey = `${fieldName}(${stringifyVariables(fieldArgs)})`;
     const isCached = cache.resolve(

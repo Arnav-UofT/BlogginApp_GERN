@@ -8,6 +8,8 @@ import {
   Ctx,
   ObjectType,
   Query,
+  FieldResolver,
+  Root,
 } from "type-graphql";
 import argon2 from "argon2";
 import { COOKIE_NAME, FORGOT_PASS_KEY } from "../constants";
@@ -34,7 +36,7 @@ class UserRes {
   user?: User;
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
   @Mutation(() => UserRes)
   async changePass(
@@ -217,5 +219,14 @@ export class UserResolver {
         resolve(true);
       })
     );
+  }
+
+  @FieldResolver(() => String)
+  email(@Root() root: User, @Ctx() { req }: MyContext) {
+    if (req.session.userId === root._id) {
+      return root.email;
+    }
+    // current user doesn't own post, so don't show email
+    return "";
   }
 }
