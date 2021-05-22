@@ -164,6 +164,14 @@ export const createUrqlClient = (ssrExchange: any) => ({
     cacheExchange({
       updates: {
         Mutation: {
+          createPost: (_result, _args, cache, _info) => {
+            // 1 option is put post on top
+            // 2nd invalidate the query then it resest the whole thing
+            cache.invalidate("Query", "posts", {
+              limit: 10,
+              cursor: null,
+            });
+          },
           logout: (_result, _args, cache, _info) => {
             bUpQuery<LogoutMutation, MeQuery>(
               cache,
