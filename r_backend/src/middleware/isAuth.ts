@@ -5,6 +5,7 @@ export const isAuth: MiddlewareFn<MyContext> = ({ context }, next) => {
   if (!context.req.session.userId) {
     throw new Error("Not Loggen In");
   }
+  console.log("reached", context.req.session.userId);
 
   return next();
 };

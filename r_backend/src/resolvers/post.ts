@@ -12,7 +12,6 @@ import {
   FieldResolver,
   Root,
   ObjectType,
-  Info,
 } from "type-graphql";
 import { MyContext } from "src/types";
 import { isAuth } from "../middleware/isAuth";
@@ -47,9 +46,14 @@ export class PostResolver {
     const extraLimit = realLimit + 1;
     //fetch 1 extra to check if there are more
 
-    const replacement: any[] = [extraLimit];
+    const replacements: any[] = [extraLimit];
+    if (req.session.userId) {
+      replacements.push(req.session.userId);
+    }
+    let cursorIdx = 3;
     if (cursor) {
-      replacement.push(new Date(parseInt(cursor)));
+      replacements.push(new Date(parseInt(cursor)));
+      cursorIdx = replacements.length;
     }
 
     const posts = await getConnection().query(
@@ -61,14 +65,19 @@ export class PostResolver {
       'email', u.email,
       'createdAt', u."createdAt",
       'updatedAt', u."updatedAt"
-      ) creator
+      ) creator,
+      ${
+        req.session.userId
+          ? '(select value from updoot where "userId" = $2 and "postId" = p._id) "voteStatus"'
+          : 'null "voteStatus"'
+      }
     FROM post p
     INNER JOIN public.user u ON u._id = p."creatorId"
-    ${cursor ? `WHERE p."createdAt" < $2` : ""}
+    ${cursor ? `WHERE p."createdAt" < $${cursorIdx}` : ""}
     ORDER BY p."createdAt" DESC
     limit $1
     `,
-      replacement
+      replacements
     );
 
     // const qB = getConnection() ---- THIS is from query builder
