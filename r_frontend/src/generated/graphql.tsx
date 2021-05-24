@@ -83,6 +83,7 @@ export type Post = {
   title: Scalars['String'];
   text: Scalars['String'];
   points: Scalars['Float'];
+  voteStatus?: Maybe<Scalars['Int']>;
   creatorId: Scalars['Float'];
   creator: User;
   createdAt: Scalars['String'];
@@ -148,7 +149,7 @@ export type RegErrorFragment = (
 
 export type RegPostSnipFragment = (
   { __typename?: 'Post' }
-  & Pick<Post, 'title' | '_id' | 'points' | 'createdAt' | 'updatedAt' | 'textSnippet'>
+  & Pick<Post, 'title' | '_id' | 'points' | 'createdAt' | 'updatedAt' | 'textSnippet' | 'voteStatus'>
   & { creator: (
     { __typename?: 'User' }
     & Pick<User, 'username' | '_id'>
@@ -291,6 +292,7 @@ export const RegPostSnipFragmentDoc = gql`
   createdAt
   updatedAt
   textSnippet
+  voteStatus
   creator {
     username
     _id

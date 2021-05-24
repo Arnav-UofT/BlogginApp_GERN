@@ -5,6 +5,7 @@ fragment RegPostSnip on Post {
   createdAt
   updatedAt
   textSnippet
+  voteStatus
   creator {
     username
     _id
