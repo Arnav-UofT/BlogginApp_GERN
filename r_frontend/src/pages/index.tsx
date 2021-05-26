@@ -1,14 +1,13 @@
-import { withUrqlClient } from "next-urql";
-import { createUrqlClient } from "../utils/createUrqlClient";
-import { usePostsQuery } from "../generated/graphql";
-import { isServer } from "../utils/isServer";
-import { Layout } from "../components/Layout";
-import NextLink from "next/link";
 import { Flex, Link, Stack } from "@chakra-ui/layout";
+import { Box, Button, Heading, Text } from "@chakra-ui/react";
+import { withUrqlClient } from "next-urql";
+import NextLink from "next/link";
 import React, { useState } from "react";
-import { Box, Button, Heading, IconButton, Text } from "@chakra-ui/react";
-import { ArrowDownIcon, ArrowUpIcon, SearchIcon } from "@chakra-ui/icons";
+import { EditDeleteButtons } from "../components/EditDeleteButtons";
+import { Layout } from "../components/Layout";
 import { Voting } from "../components/Voting";
+import { usePostsQuery } from "../generated/graphql";
+import { createUrqlClient } from "../utils/createUrqlClient";
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -25,27 +24,36 @@ const Index = () => {
   }
   return (
     <Layout variant="regular">
-      <Flex>
+      {/* <Flex>
         <Heading> Welcome to My_Reddit </Heading>
         <NextLink href="/create-post">
           <Link ml="auto"> Create a Post</Link>
         </NextLink>
-      </Flex>
-      <br />
+      </Flex> 
+      <br />*/}
       {!data && fetching ? (
         <div>Loading posts for you</div>
       ) : (
         <Stack spacing={4}>
-          {data!.posts.posts.map((p) => (
-            <Flex key={p._id} p={5} shadow="md" borderWidth="1px">
-              <Voting post={p} />
-              <Box paddingLeft={5}>
-                <Heading fontSize="xl">{p.title}</Heading>
-                <Text> by {p.creator.username}</Text>
-                <Text mt={4}>{p.textSnippet}...</Text>
-              </Box>
-            </Flex>
-          ))}
+          {data!.posts.posts.map((p) =>
+            !p ? null : (
+              <Flex key={p._id} p={5} shadow="md" borderWidth="1px">
+                <Voting post={p} />
+                <Box paddingLeft={5} flex={1}>
+                  <NextLink href="/post/[id]" as={`/post/${p._id}`}>
+                    <Link>
+                      <Heading fontSize="xl">{p.title}</Heading>
+                    </Link>
+                  </NextLink>
+                  <Text> by {p.creator.username}</Text>
+                  <Text mt={4}>{p.textSnippet}...</Text>
+                </Box>
+                <Box ml="auto">
+                  <EditDeleteButtons id={p._id} creatorId={p.creator._id} />
+                </Box>
+              </Flex>
+            )
+          )}
         </Stack>
       )}
       {data && data.posts.hasNext ? (

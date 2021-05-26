@@ -231,4 +231,12 @@ export class UserResolver {
     // current user doesn't own post, so don't show email
     return "";
   }
+
+  // @FieldResolver(() => Number)
+  // _id(@Root() root: User, @Ctx() {req}: MyContext){
+  //   if(req.session.userId){
+  //     return User.findOne(req.session.userId)
+  //   }
+  //   return null
+  // }
 }

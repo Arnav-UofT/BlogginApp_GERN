@@ -1,9 +1,12 @@
-import { Box, Flex, Link } from "@chakra-ui/layout";
-import React, { useEffect } from "react";
+import { Box, Flex, Heading, Link } from "@chakra-ui/layout";
+import React from "react";
 import NextLink from "next/link";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
 import { Button } from "@chakra-ui/button";
 import { isServer } from "../utils/isServer";
+import { withUrqlClient } from "next-urql";
+import { createUrqlClient } from "../utils/createUrqlClient";
+
 interface NavBarProps {}
 
 export const NavBar: React.FC<NavBarProps> = ({}) => {
@@ -12,13 +15,18 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
     pause: isServer(),
   });
   let body = null;
-  useEffect(() => {
-    console.log("data", data);
-  }, [data]);
+  // useEffect(() => {
+  //   console.log("data", data);
+  // }, [data]);
   if (fetching) {
   } else if (data?.me) {
     body = (
-      <Flex>
+      <Flex align="center">
+        <NextLink href="/create-post">
+          <Button as={Link} mr={4}>
+            Create Post
+          </Button>
+        </NextLink>
         <Box mr={2}>{data.me.username}</Box>
         <Button
           variant="link"
@@ -45,8 +53,17 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
   }
 
   return (
-    <Flex zIndex={1} position="sticky" top={0} bg="#9DECF9" p={4}>
-      <Box ml={"auto"}>{body}</Box>
+    <Flex zIndex={1} position="sticky" top={0} p={4} bg="cyan.200">
+      {" "}
+      {/*bg="#9DECF9 " >*/}
+      <Flex flex={1} align="center" maxW={800} m="auto">
+        <NextLink href="/">
+          <Link>
+            <Heading>GoTo - Home</Heading>
+          </Link>
+        </NextLink>
+        <Box ml={"auto"}>{body}</Box>
+      </Flex>
     </Flex>
   );
 };

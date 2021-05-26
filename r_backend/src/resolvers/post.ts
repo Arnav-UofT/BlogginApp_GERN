@@ -17,6 +17,7 @@ import { MyContext } from "src/types";
 import { isAuth } from "../middleware/isAuth";
 import { getConnection } from "typeorm";
 import { Updoot } from "../entities/Updoot";
+import { User } from "../entities/User";
 
 @InputType()
 export class PostInput {
@@ -104,14 +105,49 @@ export class PostResolver {
   }
 
   @Query(() => Post, { nullable: true })
-  post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
-    return Post.findOne(id);
+  async post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
+    const post = await Post.findOne(id, { relations: ["creator"] });
+
+    // const post = await getConnection()
+    //   .createQueryBuilder()
+    //   .relation(Post, "creator")
+    //   .of(id)
+    //   .loadOne();
+
+    // console.log("post", post);
+
+    // const post1 = getConnection()
+    // .createQueryBuilder()
+    //   .getOne(Post)
+    //   .where('_id = :id and "creatorId" = :creatorId', {
+    //     id,
+    //     creatorId: req.session.userId,
+    //   })
+    //   .returning("*")
+    //   .execute();
+
+    //   `
+    // SELECT p.*,
+    // json_build_object(
+    //   '_id', u._id,
+    //   'username', u.username
+    //   ) creator
+    // FROM post p
+    // LEFT JOIN public.user u ON p._id = $1
+    // `,
+    //   [id]
+    // );
+    return post;
   }
 
   @FieldResolver(() => String)
   textSnippet(@Root() root: Post) {
     return root.text.slice(0, 50);
   }
+  // @FieldResolver(() => String)
+  // creator(@Root() root: Post) {
+  //   return root.creator;
+  // }
 
   @Mutation(() => Boolean)
   @UseMiddleware(isAuth)
@@ -195,23 +231,51 @@ export class PostResolver {
   }
 
   @Mutation(() => Post)
+  @UseMiddleware(isAuth)
   async updatePost(
-    @Arg("id") id: number,
-    @Arg("title", () => String, { nullable: true }) title: string
+    @Arg("id", () => Int) id: number,
+    @Arg("title") title: string,
+    @Arg("text") text: string,
+    @Ctx() { req }: MyContext
   ): Promise<Post | null> {
-    const post = await Post.findOne(id);
-    if (!post) {
+    if (title === "") {
       return null;
     }
-    if (typeof title !== "undefined") {
-      await Post.update({ _id: id }, { title });
-    }
-    return post;
+    const result = await getConnection()
+      .createQueryBuilder()
+      .update(Post)
+      .set({ title, text })
+      .where('_id = :id and "creatorId" = :creatorId', {
+        id,
+        creatorId: req.session.userId,
+      })
+      .returning("*")
+      .execute();
+    // return Post.update(
+    //   { _id: id, creatorId: req.session.userId },
+    //   { title, text }
+    // );
+    return result.raw[0];
   }
 
   @Mutation(() => Boolean)
-  async deletePost(@Arg("id") id: number): Promise<boolean> {
-    await Post.delete(id);
+  @UseMiddleware(isAuth)
+  async deletePost(
+    @Arg("id", () => Int) id: number,
+    @Ctx() { req }: MyContext
+  ): Promise<boolean> {
+    // Option 1 Cascade
+    // const post = await Post.findOne(id);
+    // if (!post) {
+    //   return false;
+    // }
+    // if (post.creatorId !== req.session.userId) {
+    //   throw new Error("Not Authorized to Delete");
+    // }
+    // await Updoot.delete({ postId: id });
+    // await Post.delete({ _id: id });
+
+    await Post.delete({ _id: id, creatorId: req.session.userId });
     return true;
   }
 }
