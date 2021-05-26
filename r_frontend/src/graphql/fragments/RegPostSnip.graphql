@@ -4,6 +4,7 @@ fragment RegPostSnip on Post {
   points
   createdAt
   updatedAt
+  text
   textSnippet
   voteStatus
   creator {

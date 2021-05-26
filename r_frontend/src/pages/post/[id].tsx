@@ -9,9 +9,7 @@ import { EditDeleteButtons } from "../../components/EditDeleteButtons";
 
 const Post = ({}) => {
   const [{ data, error }] = useGetPostFromUrl();
-  useEffect(() => {
-    console.log("data", data);
-  }, [data]);
+
   if (error) {
     {
       console.log(error.message);

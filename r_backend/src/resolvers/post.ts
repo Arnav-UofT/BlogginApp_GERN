@@ -56,24 +56,26 @@ export class PostResolver {
       replacements.push(new Date(parseInt(cursor)));
       cursorIdx = replacements.length;
     }
+    // was removed after adataloader loads the creators for us
+    // json_build_object(
+    //   '_id', u._id,
+    //   'username', u.username,
+    //   'email', u.email,
+    //   'createdAt', u."createdAt",
+    //   'updatedAt', u."updatedAt"
+    //   ) creator,
+
+    // INNER JOIN public.user u ON u._id = p."creatorId"
 
     const posts = await getConnection().query(
       `
     SELECT p.*,
-    json_build_object(
-      '_id', u._id,
-      'username', u.username,
-      'email', u.email,
-      'createdAt', u."createdAt",
-      'updatedAt', u."updatedAt"
-      ) creator,
       ${
         req.session.userId
           ? '(select value from updoot where "userId" = $2 and "postId" = p._id) "voteStatus"'
           : 'null "voteStatus"'
       }
     FROM post p
-    INNER JOIN public.user u ON u._id = p."creatorId"
     ${cursor ? `WHERE p."createdAt" < $${cursorIdx}` : ""}
     ORDER BY p."createdAt" DESC
     limit $1
@@ -101,42 +103,19 @@ export class PostResolver {
       posts: posts.slice(0, realLimit),
       hasNext: posts.length === extraLimit,
     };
-    // return Post.find();
   }
 
   @Query(() => Post, { nullable: true })
   async post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
-    const post = await Post.findOne(id, { relations: ["creator"] });
+    const post = await Post.findOne(id);
+
+    // const post = await Post.findOne(id, { relations: ["creator"] });
 
     // const post = await getConnection()
     //   .createQueryBuilder()
     //   .relation(Post, "creator")
     //   .of(id)
     //   .loadOne();
-
-    // console.log("post", post);
-
-    // const post1 = getConnection()
-    // .createQueryBuilder()
-    //   .getOne(Post)
-    //   .where('_id = :id and "creatorId" = :creatorId', {
-    //     id,
-    //     creatorId: req.session.userId,
-    //   })
-    //   .returning("*")
-    //   .execute();
-
-    //   `
-    // SELECT p.*,
-    // json_build_object(
-    //   '_id', u._id,
-    //   'username', u.username
-    //   ) creator
-    // FROM post p
-    // LEFT JOIN public.user u ON p._id = $1
-    // `,
-    //   [id]
-    // );
     return post;
   }
 
@@ -144,10 +123,12 @@ export class PostResolver {
   textSnippet(@Root() root: Post) {
     return root.text.slice(0, 50);
   }
-  // @FieldResolver(() => String)
-  // creator(@Root() root: Post) {
-  //   return root.creator;
-  // }
+
+  @FieldResolver(() => User)
+  creator(@Root() root: Post, @Ctx() { userLoader }: MyContext) {
+    // return User.findOne(root.creatorId);
+    return userLoader.load(root.creatorId);
+  }
 
   @Mutation(() => Boolean)
   @UseMiddleware(isAuth)

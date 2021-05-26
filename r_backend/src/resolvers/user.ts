@@ -122,7 +122,7 @@ export class UserResolver {
       return null;
     }
     const user = User.findOne(req.session.userId);
-    console.log("User", user);
+    // console.log("User", user);
     return user;
   }
 

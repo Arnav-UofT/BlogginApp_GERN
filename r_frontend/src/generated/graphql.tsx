@@ -150,7 +150,7 @@ export type RegErrorFragment = (
 
 export type RegPostSnipFragment = (
   { __typename?: 'Post' }
-  & Pick<Post, 'title' | '_id' | 'points' | 'createdAt' | 'updatedAt' | 'textSnippet' | 'voteStatus'>
+  & Pick<Post, 'title' | '_id' | 'points' | 'createdAt' | 'updatedAt' | 'text' | 'textSnippet' | 'voteStatus'>
   & { creator: (
     { __typename?: 'User' }
     & Pick<User, 'username' | '_id'>
@@ -330,6 +330,7 @@ export const RegPostSnipFragmentDoc = gql`
   points
   createdAt
   updatedAt
+  text
   textSnippet
   voteStatus
   creator {
