@@ -1,5 +1,5 @@
 import { dedupExchange, fetchExchange, gql, stringifyVariables } from "urql";
-import { cacheExchange, Resolver } from "@urql/exchange-graphcache";
+import { Cache, cacheExchange, Resolver } from "@urql/exchange-graphcache";
 import { bUpQuery } from "./bUpQuery";
 import {
   LogoutMutation,
@@ -64,6 +64,14 @@ Resolver => {
   };
 };
 
+const resetCachePosts = (cache: Cache) => {
+  const allFields = cache.inspectFields("Query");
+  const fieldInfos = allFields.filter((info) => info.fieldName === "posts");
+  fieldInfos.forEach((fi) => {
+    cache.invalidate("Query", "posts", fi.arguments || {});
+  });
+};
+
 export const createUrqlClient = (ssrExchange: any, ctx: any) => {
   let cookie = "";
   if (isServer()) {
@@ -124,14 +132,10 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
             createPost: (_result, _args, cache, _info) => {
               // 1 option is put post on top
               // 2nd invalidate the query then it resest the whole thing
-              // 3rd invalidate by insoecting the fields of cache (like cursorpagin)
-              const allFields = cache.inspectFields("Query");
-              const fieldInfos = allFields.filter(
-                (info) => info.fieldName === "posts"
-              );
-              fieldInfos.forEach((fi) => {
-                cache.invalidate("Query", "posts", fi.arguments || {});
-              });
+
+              // 3rd invalidate by inspecting the fields of cache (like cursorpagin)
+              resetCachePosts(cache);
+
               //  this option 2
               // cache.invalidate("Query", "posts", {
               //   limit: 10,
@@ -159,6 +163,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
                   }
                 }
               );
+              resetCachePosts(cache);
             },
             register: (_result, _args, cache, _info) => {
               bUpQuery<RegisterMutation, MeQuery>(
