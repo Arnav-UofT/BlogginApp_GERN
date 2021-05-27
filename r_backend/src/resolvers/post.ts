@@ -40,23 +40,22 @@ export class PostResolver {
   @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int) limit: number,
-    @Arg("cursor", () => String, { nullable: true }) cursor: string,
-    @Ctx() { req }: MyContext
+    @Arg("cursor", () => String, { nullable: true }) cursor: string
   ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
     const extraLimit = realLimit + 1;
     //fetch 1 extra to check if there are more
 
     const replacements: any[] = [extraLimit];
-    if (req.session.userId) {
-      replacements.push(req.session.userId);
-    }
-    let cursorIdx = 3;
+    // if (req.session.userId) {
+    //   replacements.push(req.session.userId);
+    // }
+    // let cursorIdx = 3;
     if (cursor) {
       replacements.push(new Date(parseInt(cursor)));
-      cursorIdx = replacements.length;
+      // cursorIdx = replacements.length;
     }
-    // was removed after adataloader loads the creators for us
+    // was removed after dataloader loads the stuff for us - creators and votes
     // json_build_object(
     //   '_id', u._id,
     //   'username', u.username,
@@ -64,19 +63,17 @@ export class PostResolver {
     //   'createdAt', u."createdAt",
     //   'updatedAt', u."updatedAt"
     //   ) creator,
-
     // INNER JOIN public.user u ON u._id = p."creatorId"
-
+    // ${
+    //     req.session.userId
+    //     ? '(select value from updoot where "userId" = $2 and "postId" = p._id) "voteStatus"'
+    //     : 'null "voteStatus"'
+    // }
     const posts = await getConnection().query(
       `
-    SELECT p.*,
-      ${
-        req.session.userId
-          ? '(select value from updoot where "userId" = $2 and "postId" = p._id) "voteStatus"'
-          : 'null "voteStatus"'
-      }
+    SELECT p.*
     FROM post p
-    ${cursor ? `WHERE p."createdAt" < $${cursorIdx}` : ""}
+    ${cursor ? `WHERE p."createdAt" < $2` : ""}
     ORDER BY p."createdAt" DESC
     limit $1
     `,
@@ -128,6 +125,19 @@ export class PostResolver {
   creator(@Root() root: Post, @Ctx() { userLoader }: MyContext) {
     // return User.findOne(root.creatorId);
     return userLoader.load(root.creatorId);
+  }
+
+  @FieldResolver(() => Int, { nullable: true })
+  async voteStatus(@Root() root: Post, @Ctx() { voteLoader, req }: MyContext) {
+    if (!req.session.userId) {
+      return null;
+    }
+    const vote = await voteLoader.load({
+      postId: root._id,
+      userId: req.session.userId,
+    });
+
+    return vote ? vote.value : null;
   }
 
   @Mutation(() => Boolean)
