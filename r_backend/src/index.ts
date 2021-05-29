@@ -17,15 +17,17 @@ import path from "path";
 import { Updoot } from "./entities/Updoot";
 import { createUserLoader } from "./utils/createUserLoader";
 import { createVoteLoader } from "./utils/createVoteLoader";
+import "dotenv-safe/config";
 
 const main = async () => {
   const conn = await createConnection({
     type: "postgres",
-    database: "my_reddit",
-    username: "postgres",
-    password: "postgres",
+    // database: "my_reddit",
+    // username: "postgres",
+    // password: "postgres",
+    url: process.env.DATABASE_URL,
     logging: true,
-    synchronize: true,
+    // synchronize: true,
     entities: [Post, User, Updoot],
     migrations: [path.join(__dirname, "./migrations/*")],
   });
@@ -33,16 +35,17 @@ const main = async () => {
   // await Post.delete({});
   await conn.runMigrations();
   const app = express();
-  app.listen(4000, () => {
+  app.listen(parseInt(process.env.PORT), () => {
     console.log("Server Reddi :) on port 4k");
   });
 
   const RedisStore = connectRedis(session);
   const redis = new Redis();
 
+  app.set("proxy", 1);
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: process.env.CORS_ORIGIN,
       credentials: true,
     })
   );
@@ -60,9 +63,10 @@ const main = async () => {
         httpOnly: true,
         sameSite: "lax", //csrf
         secure: __prod__, // cookie only in https
+        domain: __prod__ ? ".blogapp.com" : undefined,
       },
       saveUninitialized: false,
-      secret: "somerandomsecret",
+      secret: process.env.SECRET,
       resave: false,
     })
   );
@@ -84,7 +88,7 @@ const main = async () => {
 
   apolloSever.applyMiddleware({
     app,
-    cors: false, //{ origin: "http://localhost:3000" },
+    cors: false, //{ origin: "http://localhost:3000" or from proces env },
   });
 };
 

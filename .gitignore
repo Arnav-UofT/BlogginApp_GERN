@@ -3,3 +3,5 @@ r_backend/dist
 r_backend/src/migrations
 
 f_frontend/node_modules
+
+r_backend/.env

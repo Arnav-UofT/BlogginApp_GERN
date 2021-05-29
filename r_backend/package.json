@@ -10,6 +10,8 @@
     "start2": "ts-node src/index.ts",
     "dev2": "nodemon --exec ts-node src/index.ts",
     "watch": "tsc -w",
+    "build": "tsc",
+    "gen-env": "npx gen-env-types .env -o src/env.d.ts -e .",
     "create:mig": "mikro-orm migration:create"
   },
   "keywords": [],
@@ -39,6 +41,7 @@
     "connect-redis": "^5.2.0",
     "cors": "^2.8.5",
     "dataloader": "^2.0.0",
+    "dotenv-safe": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "graphql": "^15.5.0",
