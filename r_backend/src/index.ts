@@ -33,7 +33,7 @@ const main = async () => {
   });
 
   // await Post.delete({});
-  await conn.runMigrations();
+  // await conn.runMigrations();
   const app = express();
   app.listen(parseInt(process.env.PORT), () => {
     console.log("Server Reddi :) on port 4k");

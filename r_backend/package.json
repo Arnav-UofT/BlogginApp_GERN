@@ -12,6 +12,7 @@
     "watch": "tsc -w",
     "build": "tsc",
     "gen-env": "npx gen-env-types .env -o src/env.d.ts -e .",
+    "heroku-postbuild": "cd ../r_frontend && npm i && yarn start",
     "create:mig": "mikro-orm migration:create"
   },
   "keywords": [],
