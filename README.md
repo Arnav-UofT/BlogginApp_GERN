@@ -7,6 +7,8 @@ Blogging and Posting webapp with various dev technologies :- GraphQL, React, Nod
 - Apollo Server for routing, Redis session auhtentication with Argon2 encryption
 - Next.js frontend framework, Chakra-UI stying components
 
+![Login](https://media.giphy.com/media/qFQ2QJZUt77UrmKYnI/giphy.gif)
+
 ![Posting-New](https://media.giphy.com/media/Piegt47esImPZ5cUsl/giphy.gif)
 
 ![Responsive](https://media.giphy.com/media/2MAjggPYGNfS6yIJ6A/giphy.gif)
