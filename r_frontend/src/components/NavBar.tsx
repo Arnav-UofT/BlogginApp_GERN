@@ -24,7 +24,7 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
     body = (
       <Flex align="center">
         <NextLink href="/create-post">
-          <Button as={Link} mr={4}>
+          <Button as={Link} mr={4} variant="link" color="blackAlpha">
             Create Post
           </Button>
         </NextLink>
@@ -61,7 +61,7 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
       <Flex flex={1} align="center" maxW={800} m="auto">
         <NextLink href="/">
           <Link>
-            <Heading>GoTo - Home</Heading>
+            <Heading>Welcome</Heading>
           </Link>
         </NextLink>
         <Box ml={"auto"}>{body}</Box>

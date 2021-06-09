@@ -1,7 +1,7 @@
 import { Text } from "@chakra-ui/layout";
 import { Heading, Box } from "@chakra-ui/react";
 import { withUrqlClient } from "next-urql";
-import React, { useEffect } from "react";
+import React from "react";
 import { Layout } from "../../components/Layout";
 import { createUrqlClient } from "../../utils/createUrqlClient";
 import { useGetPostFromUrl } from "../../utils/useGetPostFromUrl";

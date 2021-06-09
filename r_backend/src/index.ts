@@ -21,9 +21,10 @@ import { createVoteLoader } from "./utils/createVoteLoader";
 const main = async () => {
   const conn = await createConnection({
     type: "postgres",
-    database: "my_reddit",
+    database: "testdb",
     username: "postgres",
     password: "postgres",
+    host: process.env.DB_HOST || "localhost",
     logging: true,
     synchronize: true,
     entities: [Post, User, Updoot],
@@ -33,16 +34,18 @@ const main = async () => {
   // await Post.delete({});
   await conn.runMigrations();
   const app = express();
-  app.listen(4000, () => {
-    console.log("Server Reddi :) on port 4k");
+  app.listen(process.env.PORT || 4000, () => {
+    console.log("Server Ready :) on port:4000");
   });
 
   const RedisStore = connectRedis(session);
-  const redis = new Redis();
+  const redis = new Redis({
+    host: process.env.REDIS_HOST || "localhost",
+  });
 
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: process.env.ORIGIN || "http://localhost:3000",
       credentials: true,
     })
   );

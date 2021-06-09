@@ -14,19 +14,25 @@ const Index = () => {
     limit: 10,
     cursor: null as null | string,
   });
-  const [{ data, error, fetching }] = usePostsQuery({
+  const [{ data, fetching }] = usePostsQuery({
     // pause: isServer(),
     variables,
   });
 
-  if (!fetching && !data) {
-    return (
-      <div>
-        Query failed due to some Error. No Posts
-        {error?.message}
-      </div>
-    );
-  }
+  // const [posts, setPosts] = useState({});
+
+  // useEffect(() => {
+  //   setPosts(data.posts);
+  // }, [fetching]);
+
+  // if (!fetching && !data) {
+  //   return (
+  //     <div>
+  //       Query failed due to some Error. No Posts
+  //       {error?.message}
+  //     </div>
+  //   );
+  // }
   return (
     <Layout variant="regular">
       {/* <Flex>
@@ -38,9 +44,11 @@ const Index = () => {
       <br />*/}
       {!data && fetching ? (
         <div>Loading posts for you</div>
+      ) : data?.posts?.posts?.length === 0 ? (
+        <div>Welcome - Be the first to Post!</div>
       ) : (
         <Stack spacing={4}>
-          {data!.posts.posts.map((p) =>
+          {data!.posts?.posts?.map((p) =>
             !p ? null : (
               <Flex key={p._id} p={5} shadow="md" borderWidth="1px">
                 <Voting post={p} />
@@ -61,7 +69,7 @@ const Index = () => {
           )}
         </Stack>
       )}
-      {data && data.posts.hasNext ? (
+      {data && data.posts?.hasNext ? (
         <Flex>
           <Button
             m="auto"
@@ -83,4 +91,4 @@ const Index = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(Index);
+export default withUrqlClient(createUrqlClient, { ssr: false })(Index);
