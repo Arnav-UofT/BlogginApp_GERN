@@ -43,7 +43,12 @@ const main = async () => {
     host: process.env.REDIS_HOST || "localhost",
   });
 
-  app.use(cors());
+  app.use(
+    cors({
+      origin: process.env.ORIGIN || "http://localhost:3000",
+      credentials: true,
+    })
+  );
 
   app.use(
     session({
@@ -83,10 +88,10 @@ const main = async () => {
 
   apolloSever.applyMiddleware({
     app,
-    // cors: {
-    //   origin: process.env.ORIGIN || "http://localhost:3000",
-    //   credentials: true,
-    // }, //false, //{ origin: "http://localhost:3000" },
+    cors: {
+      origin: process.env.ORIGIN || "http://localhost:3000",
+      // credentials: true,
+    }, //false, //{ origin: "http://localhost:3000" },
   });
 };
 
