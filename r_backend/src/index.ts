@@ -83,6 +83,7 @@ const main = async () => {
       userLoader: createUserLoader(),
       voteLoader: createVoteLoader(),
     }),
+    // cors: { origin: "http://localhost:3000" },
   });
 
   apolloSever.applyMiddleware({
