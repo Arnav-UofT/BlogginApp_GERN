@@ -22,13 +22,14 @@ services:
     environment:
       REDIS_HOST: redis
       DB_HOST: db
+      ORIGIN: http://128.199.26.89:3000
     depends_on:
-      - 'db'
-      - 'redis'
+      - "db"
+      - "redis"
       # db:
-       # condition: service_completed_successfully
+      # condition: service_completed_successfully
       # redis:
-       # condition: service_completed_successfully
+      # condition: service_completed_successfully
   frontend:
     build:
       context: r_frontend
@@ -38,6 +39,6 @@ services:
     environment:
       API_URL: http://backend:4000/grpahql
     depends_on:
-      - 'backend'
-     #  backend:
-       # condition: service_completed_successfully
+      - "backend"
+      #  backend:
+      # condition: service_completed_successfully
