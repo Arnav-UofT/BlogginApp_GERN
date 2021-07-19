@@ -88,10 +88,10 @@ const main = async () => {
 
   apolloSever.applyMiddleware({
     app,
-    cors: {
-      origin: process.env.ORIGIN || "http://localhost:3000",
-      credentials: true,
-    }, //false, //{ origin: "http://localhost:3000" },
+    // cors: {
+    //   origin: process.env.ORIGIN || "http://localhost:3000",
+    //   credentials: true,
+    // }, //false, //{ origin: "http://localhost:3000" },
   });
 };
 
