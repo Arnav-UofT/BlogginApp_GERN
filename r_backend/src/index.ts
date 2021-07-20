@@ -31,6 +31,21 @@ const main = async () => {
     migrations: [path.join(__dirname, "./migrations/*")],
   });
 
+  const apolloSever = new ApolloServer({
+    schema: await buildSchema({
+      resolvers: [HelloResolver, PostResolver, UserResolver],
+      validate: false,
+    }),
+    // batch and cache multiple user loading request into one request
+    context: ({ req, res }) => ({
+      req,
+      res,
+      redis,
+      userLoader: createUserLoader(),
+      voteLoader: createVoteLoader(),
+    }),
+  });
+  await apolloSever.start();
   // await Post.delete({});
   await conn.runMigrations();
   const app = express();
@@ -70,26 +85,11 @@ const main = async () => {
     })
   );
 
-  const apolloSever = new ApolloServer({
-    schema: await buildSchema({
-      resolvers: [HelloResolver, PostResolver, UserResolver],
-      validate: false,
-    }),
-    // batch and cache multiple user loading request into one request
-    context: ({ req, res }) => ({
-      req,
-      res,
-      redis,
-      userLoader: createUserLoader(),
-      voteLoader: createVoteLoader(),
-    }),
-  });
-
   apolloSever.applyMiddleware({
     app,
     cors: {
       origin: process.env.ORIGIN || "http://localhost:3000",
-      // credentials: true,
+      credentials: true,
     }, //false, //{ origin: "http://localhost:3000" },
   });
 };
