@@ -22,6 +22,7 @@ services:
     environment:
       REDIS_HOST: redis
       DB_HOST: db
+      ORIGIN: http://128.199.26.89:3000
     depends_on:
       - "db"
       - "redis"
