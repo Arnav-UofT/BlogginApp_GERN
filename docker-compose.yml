@@ -37,7 +37,7 @@ services:
     ports:
       - 3000:3000
     environment:
-      API_URL: http://backend:4000/grpahql
+      API_URL: http://128.199.26.89:4000/grpahql
     depends_on:
       - "backend"
       #  backend:
