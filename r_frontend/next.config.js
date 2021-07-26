@@ -6,7 +6,7 @@ module.exports = {
     //     return [
     //         {
     //             source: '/:path*',
-    //             destination: 'http://128.199.26.89:4000/graphql/:path*',
+    //             destination: 'http://localhost:4000/graphql/:path*',
     //         },
     //     ]
     // },
