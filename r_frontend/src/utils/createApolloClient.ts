@@ -1,5 +1,5 @@
 import { ApolloClient, InMemoryCache } from "@apollo/client";
-// import { withApollo } from "next-apollo";
+// import { withApollo as createWithApollo } from "next-apollo";
 import { createWithApollo } from "./createMyApollo";
 import { PaginatedPosts } from "../generated/graphql";
 import { NextPageContext } from "next";
@@ -10,7 +10,8 @@ const _client = (ctx: NextPageContext) =>
     uri: process.env.API_URL || "http://localhost:4000/graphql",
     credentials: "include",
     headers: {
-      cookie: (isServer() ? ctx.req?.headers.cookie : undefined) || "",
+      cookie: (isServer() ? ctx?.req?.headers.cookie : undefined) || "",
+      // cookie: req.headers.cookie
     },
     cache: new InMemoryCache({
       typePolicies: {
@@ -35,4 +36,3 @@ const _client = (ctx: NextPageContext) =>
   });
 
 export const with_MyApollo = createWithApollo(_client);
-``;

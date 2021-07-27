@@ -1,16 +1,11 @@
 import { Flex, Link, Stack } from "@chakra-ui/layout";
 import { Box, Button, Heading, Text } from "@chakra-ui/react";
-// import { withUrqlClient } from "next-urql";
 import NextLink from "next/link";
-// import React, { useState } from "react";
 import { EditDeleteButtons } from "../components/EditDeleteButtons";
 import { Layout } from "../components/Layout";
 import { Voting } from "../components/Voting";
-
 import { usePostsQuery } from "../generated/grapqhl";
 import { with_MyApollo } from "../utils/createApolloClient";
-
-// import { createUrqlClient } from "../utils/createUrqlClient";
 
 const Index = () => {
   // const [variables, setVariables] = useState({
@@ -26,20 +21,6 @@ const Index = () => {
     notifyOnNetworkStatusChange: true,
   });
 
-  // const [posts, setPosts] = useState({});
-
-  // useEffect(() => {
-  //   setPosts(data.posts);
-  // }, [fetching]);
-
-  // if (!fetching && !data) {
-  //   return (
-  //     <div>
-  //       Query failed due to some Error. No Posts
-  //       {error?.message}
-  //     </div>
-  //   );
-  // }
   return (
     <Layout variant="regular">
       {/* <Flex>
@@ -90,25 +71,7 @@ const Index = () => {
                   cursor:
                     data.posts.posts[data.posts.posts.length - 1].createdAt,
                 },
-                // updateQuery: (prev, { fetchMoreResult }) => {
-                //   if (!fetchMoreResult) {
-                //     return prev;
-                //   }
-                //   return {
-                //     __typename: "Query",
-                //     posts: {
-                //       __typename: "PaginatedPosts",
-                //       hasMore: (fetchMoreResult as PostsQuery).posts.hasMore,
-                //       posts: [
-                //         ...(prev as PostsQuery).posts.posts,
-                //         ...(fetchMoreResult as PostsQuery).posts.posts,
-                //       ],
-                //     },
-                //   };
-                // },
               });
-              // setVariables({
-              // });
             }}
           >
             Load More...
