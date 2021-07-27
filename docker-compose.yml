@@ -13,32 +13,32 @@ services:
     image: redis:latest
     ports:
       - 6379:6379
-  backend:
-    build:
-      context: r_backend
-      dockerfile: Dockerfile
-    ports:
-      - 4000:4000
-    environment:
-      REDIS_HOST: redis
-      DB_HOST: db
-      ORIGIN: http://frontend:3000/
-    depends_on:
-      - "db"
-      - "redis"
-      # db:
-      # condition: service_completed_successfully
-      # redis:
-      # condition: service_completed_successfully
-  frontend:
-    build:
-      context: r_frontend
-      dockerfile: Dockerfile
-    ports:
-      - 3000:3000
-    environment:
-      API_URL: http://backend:4000/graphql
-    depends_on:
-      - "backend"
-      #  backend:
-      # condition: service_completed_successfully
+  # backend:
+  #   build:
+  #     context: r_backend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 4000:4000
+  #   environment:
+  #     REDIS_HOST: redis
+  #     DB_HOST: db
+  #     ORIGIN: http://frontend:3000/
+  #   depends_on:
+  #     - "db"
+  #     - "redis"
+  # db:
+  # condition: service_completed_successfully
+  # redis:
+  # condition: service_completed_successfully
+  # frontend:
+  #   build:
+  #     context: r_frontend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 3000:3000
+  #   environment:
+  #     API_URL: http://backend:4000/graphql
+  #   depends_on:
+  #     - "backend"
+  #  backend:
+  # condition: service_completed_successfully

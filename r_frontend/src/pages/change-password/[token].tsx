@@ -1,18 +1,19 @@
 import { Box, Button, Flex, Link } from "@chakra-ui/react";
 import { Formik, Form } from "formik";
 import { NextPage } from "next";
-import { withUrqlClient } from "next-urql";
+// import { withUrqlClient } from "next-urql";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { InputField } from "../../components/InputField";
 import { Wrapper } from "../../components/Wrapper";
-import { useChangePasswordMutation } from "../../generated/graphql";
-import { createUrqlClient } from "../../utils/createUrqlClient";
+import { MeDocument, useChangePasswordMutation } from "../../generated/graphql";
+import { with_MyApollo } from "../../utils/createApolloClient";
+// import { createUrqlClient } from "../../utils/createUrqlClient";
 import { toErrorMap } from "../../utils/toErrorMap";
 
 const ChangePassword: NextPage = () => {
-  const [{}, changePass] = useChangePasswordMutation();
+  const [changePass] = useChangePasswordMutation();
   const [tokenError, setTokenError] = useState("");
 
   const router = useRouter();
@@ -23,9 +24,23 @@ const ChangePassword: NextPage = () => {
         initialValues={{ newPassword: "" }}
         onSubmit={async (values, { setErrors }) => {
           const response = await changePass({
-            token:
-              typeof router.query.token === "string" ? router.query.token : "",
-            newPassword: values.newPassword,
+            variables: {
+              token:
+                typeof router.query.token === "string"
+                  ? router.query.token
+                  : "",
+              newPassword: values.newPassword,
+            },
+            update: (cache, { data }) => {
+              cache.writeQuery({
+                query: MeDocument,
+                data: {
+                  __typename: "Query",
+                  me: data?.changePass.user,
+                },
+              });
+              cache.evict({ fieldName: "posts:{}" });
+            },
           });
           if (response.data?.changePass.errors) {
             const errorMap = toErrorMap(response.data.changePass.errors);
@@ -74,4 +89,4 @@ const ChangePassword: NextPage = () => {
 //   };
 // };
 
-export default withUrqlClient(createUrqlClient)(ChangePassword);
+export default with_MyApollo({ ssr: false })(ChangePassword); //withUrqlClient(createUrqlClient)(ChangePassword);

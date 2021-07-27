@@ -1,21 +1,22 @@
 import { Box, Flex, Button } from "@chakra-ui/react";
 import { Formik, Form } from "formik";
-import { withUrqlClient } from "next-urql";
+// import { withUrqlClient } from "next-urql";
 import React, { useState } from "react";
 import { useForgotPasswordMutation } from "../generated/graphql";
 import { InputField } from "../components/InputField";
 import { Wrapper } from "../components/Wrapper";
-import { createUrqlClient } from "../utils/createUrqlClient";
+import { with_MyApollo } from "../utils/createApolloClient";
+// import { createUrqlClient } from "../utils/createUrqlClient";
 
 const ForgotPassword: React.FC<{}> = ({}) => {
-  const [{}, forgotPass] = useForgotPasswordMutation();
+  const [forgotPass] = useForgotPasswordMutation();
   const [complete, setComplete] = useState(false);
   return (
     <Wrapper variant="small">
       <Formik
         initialValues={{ email: "" }}
         onSubmit={async (values) => {
-          await forgotPass(values);
+          await forgotPass({ variables: { ...values } });
           setComplete(true);
         }}
       >
@@ -43,4 +44,4 @@ const ForgotPassword: React.FC<{}> = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(ForgotPassword);
+export default with_MyApollo({ ssr: false })(ForgotPassword); //withUrqlClient(createUrqlClient)(ForgotPassword);
