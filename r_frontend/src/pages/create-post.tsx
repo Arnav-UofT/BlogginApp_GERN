@@ -24,6 +24,7 @@ const CreatePost: React.FC<{}> = ({}) => {
             variables: { input: values },
             update: (cache) => {
               cache.evict({ fieldName: "posts:{}" });
+              cache.reset(); // WORK AROUND
             },
           });
           if (!errors) {

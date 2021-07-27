@@ -1,6 +1,7 @@
 import React from "react";
 import App from "next/app";
-import Head from "next/head";
+// import Head from "next/head";
+// import { Head } from 'next'
 import { ApolloProvider } from "@apollo/client";
 
 // On the client, we store the Apollo Client in the following variable.
@@ -163,7 +164,22 @@ export const createWithApollo = (ac) => {
 
                         // getDataFromTree does not call componentWillUnmount
                         // head side effect therefore need to be cleared manually
-                        Head.rewind();
+
+
+
+
+                        /////////////////////////
+                        // Head.rewind();
+
+                        // i commented this out but wtffffff
+                        // help lol SOS HELP KEY ERRORS COMPILE PROD CHECK
+
+
+
+
+
+
+
                     }
                 }
 
