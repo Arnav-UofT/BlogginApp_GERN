@@ -2,7 +2,7 @@ FROM node:14
 
 ENV NODE_ENV=production
 WORKDIR /appf
-COPY ["package.json", "yarn.lock", "package-lock.json", "./"]
+COPY ["package.json", "yarn.lock", "./"]
 # RUN npm install --production
 RUN yarn
 RUN yarn add --dev typescript
